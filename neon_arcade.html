@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON ARCADE | Play Together</title>
+<style>
+:root{--bg:#080812;--panel:#111124;--cyan:#00f5ff;--pink:#ff35d3;--purple:#7655ff;--text:#f5f5ff;--muted:#a7a7c7}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 20% 0%,#20103d 0,transparent 35%),var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 7%;border-bottom:1px solid #292945;backdrop-filter:blur(12px)}
+.logo{font-weight:900;letter-spacing:2px;font-size:1.25rem}.logo span{color:var(--cyan);text-shadow:0 0 15px var(--cyan)}
+nav{display:flex;gap:20px}nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--cyan)}
+.hero{text-align:center;padding:65px 20px 35px}.eyebrow{color:var(--pink);letter-spacing:4px;font-size:.8rem;font-weight:bold}
+h1{font-size:clamp(2.4rem,7vw,5rem);margin:12px 0;background:linear-gradient(90deg,var(--cyan),white,var(--pink));background-clip:text;color:transparent}
+.hero p{color:var(--muted);max-width:620px;margin:0 auto;line-height:1.6}
+.container{width:min(1050px,92%);margin:30px auto 70px;display:grid;grid-template-columns:1.1fr .9fr;gap:22px}
+.panel{background:linear-gradient(145deg,#15152c,#0e0e1c);border:1px solid #2b2b50;border-radius:20px;padding:25px;box-shadow:0 15px 45px #0005}
+.panel h2{margin:0 0 8px}.sub{color:var(--muted);font-size:.92rem;margin:0 0 20px}
+.status{padding:12px;border-radius:10px;background:#20203a;color:var(--cyan);text-align:center;margin:16px 0;font-weight:bold}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:390px;margin:auto}
+.cell{aspect-ratio:1;background:#0a0a18;border:1px solid #393960;border-radius:13px;color:var(--cyan);font-size:clamp(2rem,8vw,3.5rem);font-weight:800;cursor:pointer;transition:.15s}
+.cell:hover{border-color:var(--cyan);box-shadow:0 0 18px #00f5ff30;transform:translateY(-2px)}
+.cell.o{color:var(--pink)}.cell.win{background:#252044;border-color:#fff;box-shadow:0 0 20px #ff35d355}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.btn{border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer;background:var(--purple);color:white}
+.btn.secondary{background:#24243c;border:1px solid #45456a}.btn:hover{filter:brightness(1.15)}
+.score{display:flex;justify-content:center;gap:18px;color:var(--muted);margin-top:18px}.score strong{color:white}
+.field{width:100%;background:#090916;border:1px solid #393960;border-radius:10px;padding:12px;color:white;margin:7px 0 12px}
+.room-code{font-size:1.7rem;letter-spacing:5px;color:var(--cyan);font-weight:800;text-align:center;margin:18px 0}
+.note{font-size:.82rem;color:var(--muted);line-height:1.5}
+.game-card{border:1px solid #303052;border-radius:14px;padding:16px;margin-top:15px;background:#0b0b19}
+.tag{font-size:.7rem;color:var(--cyan);border:1px solid #16646b;padding:4px 8px;border-radius:20px}
+footer{text-align:center;color:var(--muted);padding:25px;border-top:1px solid #24243b}
+@media(max-width:760px){header{padding:18px 5%}nav{gap:12px;font-size:.85rem}.container{grid-template-columns:1fr}.hero{padding-top:45px}.panel{padding:20px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">NEON <span>ARCADE</span></div>
+  <nav><a href="#play">Play</a><a href="#multiplayer">Multiplayer</a></nav>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">YOUR NEXT GAME STARTS HERE</div>
+  <h1>PLAY. CONNECT. WIN.</h1>
+  <p>A neon gaming space for friends. Start with Tic-Tac-Toe and get ready for online multiplayer challenges.</p>
+</section>
+
+<main class="container">
+  <section class="panel" id="play">
+    <h2>⚡ Neon Tic-Tac-Toe</h2>
+    <p class="sub">Two players · Same device</p>
+    <div class="status" id="status" aria-live="polite">Player X's turn</div>
+    <div class="board" id="board" role="grid" aria-label="Tic Tac Toe board"></div>
+    <div class="score"><span>Player X: <strong id="scoreX">0</strong></span><span>Player O: <strong id="scoreO">0</strong></span></div>
+    <div class="actions"><button class="btn" id="restart">↻ Restart round</button><button class="btn secondary" id="resetScore">Reset score</button></div>
+  </section>
+
+  <aside class="panel" id="multiplayer">
+    <h2>🌐 Online Multiplayer</h2>
+    <p class="sub">Room interface preview</p>
+    <label for="playerName">Your player name</label>
+    <input class="field" id="playerName" maxlength="18" placeholder="Enter your name">
+    <button class="btn" id="createRoom">＋ Create room code</button>
+    <div class="room-code" id="roomCode">------</div>
+    <label for="joinCode">Enter friend's room code</label>
+    <input class="field" id="joinCode" maxlength="6" placeholder="6-character code">
+    <button class="btn secondary" id="joinRoom">Join room</button>
+    <p class="note" id="roomMessage" aria-live="polite">This is a front-end demo. Room codes are not connected to a server yet.</p>
+    <div class="game-card"><span class="tag">COMING NEXT</span><h3>Real-time online play</h3><p class="note">Next, connect Firebase so two players on different devices can share the same game.</p></div>
+  </aside>
+</main>
+<footer>NEON ARCADE · Made with HTML, CSS & JavaScript</footer>
+
+<script>
+const boardEl=document.getElementById('board');
+const statusEl=document.getElementById('status');
+let cells=Array(9).fill('');
+let current='X',finished=false;
+let scores={X:0,O:0};
+const winningLines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+function renderBoard(){
+ boardEl.innerHTML='';
+ cells.forEach((value,index)=>{
+   const b=document.createElement('button');
+   b.className='cell'+(value==='O'?' o':'');
+   b.textContent=value;
+   b.setAttribute('role','gridcell');
+   b.setAttribute('aria-label',`Cell ${index+1}${value?', '+value:''}`);
+   b.addEventListener('click',()=>play(index));
+   boardEl.appendChild(b);
+ });
+}
+function play(index){
+ if(finished||cells[index])return;
+ cells[index]=current;
+ const line=winningLines.find(l=>l.every(i=>cells[i]===current));
+ if(line){
+   finished=true;scores[current]++;
+   statusEl.textContent=`🎉 Player ${current} wins!`;
+   line.forEach(i=>boardEl.children[i]?.classList.add('win'));
+   // Re-render, then mark winning cells
+   renderBoard();line.forEach(i=>boardEl.children[i].classList.add('win'));
+ }else if(cells.every(Boolean)){
+   finished=true;statusEl.textContent='🤝 Draw game!';
+ }else{
+   current=current==='X'?'O':'X';
+   statusEl.textContent=`Player ${current}'s turn`;
+ }
+ document.getElementById('scoreX').textContent=scores.X;
+ document.getElementById('scoreO').textContent=scores.O;
+ renderBoard();
+ if(line)line.forEach(i=>boardEl.children[i].classList.add('win'));
+}
+function restart(){
+ cells=Array(9).fill('');current='X';finished=false;
+ statusEl.textContent="Player X's turn";renderBoard();
+}
+document.getElementById('restart').addEventListener('click',restart);
+document.getElementById('resetScore').addEventListener('click',()=>{scores={X:0,O:0};document.getElementById('scoreX').textContent=0;document.getElementById('scoreO').textContent=0;restart();});
+function randomCode(){return Math.random().toString(36).slice(2,8).toUpperCase();}
+document.getElementById('createRoom').addEventListener('click',()=>{
+ const name=document.getElementById('playerName').value.trim()||'Player';
+ const code=randomCode();document.getElementById('roomCode').textContent=code;
+ document.getElementById('roomMessage').textContent=`Demo room ${code} created for ${name}. This code is local only—not an online room.`;
+});
+document.getElementById('joinRoom').addEventListener('click',()=>{
+ const code=document.getElementById('joinCode').value.trim().toUpperCase();
+ document.getElementById('roomMessage').textContent=code.length===6?`Room code ${code} entered. Online joining needs a multiplayer server.`:'Please enter a 6-character room code.';
+});
+renderBoard();
+</script>
+</body>
+</html>
